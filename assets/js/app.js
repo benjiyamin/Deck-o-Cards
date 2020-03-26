@@ -45,20 +45,20 @@ function animateCardContainer(cardContainer, newWrapperSel) {
 }
 
 function updateDeckImages(decks) {
-  let card = decks.flippedDeck.pop()
-  $('#flippedDeck')
-    .css({
-      'opacity': 1
-    })
+  let card = decks.flippedDeck.slice(-1)[0]
   let $flippedDeck = $('#flippedDeck')
+  let $unflippedDeck = $('#unflippedDeck')
   $flippedDeck
     .find('.card-img-top')
     .attr('src', card ? card.imgUrl : 'assets/images/playing-card-back.png')
-  if (!card) {
-    $flippedDeck.css({
-      opacity: 0
-    })
-  }
+  
+  $flippedDeck.css({
+    opacity: card ? 1 : 0
+  })
+
+  $unflippedDeck.css({
+    opacity: decks.unflippedDeck.length ? 1 : 0
+  })
 }
 
 function initCardContainer(wrapperSel, card, flipped) {
@@ -160,32 +160,13 @@ function Application(messages, cards) {
     database.ref('game/flippedDeck').set(decks.flippedDeck)
   }
 
-  this.flipCard = function () {
+  this.flipCard = function (cardSnap) {
     database.ref('game').once('value', function (gameSnap) {
       let decks = self.getDecks(gameSnap)
-      let card = decks.unflippedDeck.pop()
-      decks.flippedDeck.push(card)
-
-      // Update the database
-      self.updateDatabase(decks)
+      let card = cardSnap.val()
 
       // Update the counters
       self.updateCounters(decks)
-
-      // Update the animation
-      opacity = decks.unflippedDeck.length ? 1 : 0
-      $('#unflippedDeck')
-        .css({
-          'opacity': opacity
-        })
-      if (decks.flippedDeck.length == 1) {
-        setTimeout(function () {
-          $('#unflippedDeck')
-            .css({
-              'opacity': 1
-            })
-        }, 600)
-      }
 
       let cardContainer = initCardContainer('#unflippedWrapper', card)
       animateCardContainer(cardContainer, '#flippedWrapper')
@@ -195,32 +176,13 @@ function Application(messages, cards) {
     })
   }
 
-  this.unflipCard = function () {
+  this.unflipCard = function (cardSnap) {
     database.ref('game').once('value', function (gameSnap) {
       let decks = self.getDecks(gameSnap)
-      let card = decks.flippedDeck.pop()
-      decks.unflippedDeck.push(card)
-
-      // Update the database
-      self.updateDatabase(decks)
+      let card = cardSnap.val()
 
       // Update the counters
       self.updateCounters(decks)
-
-      // Update the animation
-      opacity = decks.flippedDeck.length ? 1 : 0
-      $('#flippedDeck')
-        .css({
-          'opacity': opacity
-        })
-      if (decks.unflippedDeck.length == 1) {
-        setTimeout(function () {
-          $('#unflippedDeck')
-            .css({
-              'opacity': 1
-            })
-        }, 600)
-      }
 
       let cardContainer = initCardContainer('#flippedWrapper', card, true)
       updateDeckImages(decks)
@@ -232,6 +194,10 @@ function Application(messages, cards) {
     $('#flippedDeck')
       .css({
         'opacity': 0
+      })
+    $('#unflippedDeck')
+      .css({
+        'opacity': 1
       })
 
     let unflippedDeckExists = gameSnap.child("unflippedDeck").exists()
@@ -249,7 +215,6 @@ function Application(messages, cards) {
 
     // Update the animation
     let card = decks.flippedDeck.slice(-1)[0]
-    //self.animateCardFlip('#img1', card)
 
     if (decks.flippedDeck.length) {
       let cardContainer = initCardContainer('#unflippedWrapper', card)
@@ -265,6 +230,16 @@ function Application(messages, cards) {
     self.init(gameSnap)
   })
 
+  // On flip
+  database.ref('game/flippedDeck').on('child_added', function (cardSnap) {
+    self.flipCard(cardSnap)
+  })
+
+  // On unflip
+  database.ref('game/flippedDeck').on('child_removed', function (cardSnap) {
+    self.unflipCard(cardSnap)
+  })
+
   this.authenticate = function () {
     firebase.auth().signInAnonymously().catch(function (error) {
       // Handle Errors here.
@@ -275,12 +250,25 @@ function Application(messages, cards) {
   }
 
   $('#unflippedDeck').on('click', function () {
-    self.flipCard()
+    database.ref('game').once('value', function (gameSnap) {
+      let decks = self.getDecks(gameSnap)
+      let card = decks.unflippedDeck.pop()
+      decks.flippedDeck.push(card)
+
+      self.updateDatabase(decks)
+    })
   })
 
   $('#flippedDeck').on('click', function () {
-    self.unflipCard()
+    database.ref('game').once('value', function (gameSnap) {
+      let decks = self.getDecks(gameSnap)
+      let card = decks.flippedDeck.pop()
+      decks.unflippedDeck.push(card)
+
+      self.updateDatabase(decks)
+    })
   })
+
 
   this.sendMessage = function () {
     let $msgInput = $('#msgInput')
