@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <title>Deck o' Cards</title>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
+    integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+
+  <!-- Link to Moment.js should go here -->
+  <script src="https://cdn.jsdelivr.net/momentjs/2.12.0/moment.min.js"></script>
+
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+
+<body class="bg-main text-light">
+
+  <nav class="navbar navbar-dark bg-dark flex-md-nowrap">
+    <a class="navbar-brand" href="#">Deck o' Cards <small>Quarantine Edition</small></a>
+  </nav>
+
+  <div class="container">
+    <div class="row">
+
+      <main role="main" class="col ml-sm-auto px-4">
+        <div class="jumbotron bg-transparent mb-0 py-5">
+          <div class="row text-center">
+            <div class="col-sm-6 lead">
+              <div id="message"></div>
+              <div id="choice">
+                <p>Connected with another player. Make your choice..</p>
+              </div>
+              <button type="button" class="btn btn-large btn-light" data-toggle="modal" data-target="#shuffleModal">New Deck</button>
+            </div>
+            <div class="col-sm-6">
+              <div class="row lead">
+                <div class="col">
+                  <span class="pr-3"><span id="flippedText">0</span> flipped</span>
+                  <span class="pl-3"><span id="unflippedText">0</span> unflipped</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <hr class="my-4">
+          <div class="row">
+            <div class="col mx-lg-5" id="flippedWrapper">
+              <div class="flip-container" id="flippedDeck">
+                <div class="flipper shadow">
+                  <div class="front">
+                    <div class="card">
+                      <img src="assets/images/playing-card-back.png" class="card-img-top">
+                    </div>
+                  </div>
+                  <div class="back">
+                    <div class="card">
+                      <img src="assets/images/playing-card-back.png" class="card-img-top">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col mx-lg-5" id="unflippedWrapper">
+              <div class="flip-container" id="unflippedDeck">
+                <div class="flipper shadow">
+                  <div class="front">
+                    <div class="card">
+                      <img src="assets/images/playing-card-back.png" class="card-img-top">
+                    </div>
+                  </div>
+                  <div class="back">
+                    <div class="card">
+                      <img src="assets/images/playing-card-back.png" class="card-img-top">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <div class="card d-none d-md-block bg-dark chat-card">
+        <h5 class="card-header">Chat <span class="float-right" id="minChat"><i class="fas fa-minus-square"></i></span>
+        </h5>
+        <div class="card-body bg-light" id="chatBody" style="display: none;">
+          <div class="chat-wrapper">
+            <div class="chat-input">
+              <div class="input-group mb-1">
+                <input type="text" class="form-control" placeholder="Your message" aria-label="Your message"
+                  aria-describedby="msgBtn" id="msgInput">
+                <div class="input-group-append">
+                  <button class="btn btn-primary" type="button" id="msgBtn">Send</button>
+                </div>
+              </div>
+            </div>
+            <div id="chatMessages">
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="modal" tabindex="-1" role="dialog" id="shuffleModal">
+    <div class="modal-dialog text-dark" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Warning</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>You are about to shuffle the deck. This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-dismiss="modal" id="shuffleBtn">Shuffle</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Optional JavaScript -->
+  <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+    integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+    integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">
+  </script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
+  </script>
+
+  <script src="https://www.gstatic.com/firebasejs/5.10.0/firebase.js"></script>
+
+  <script src="assets/js/messages.js"></script>
+  <script src="assets/js/chat.js"></script>
+  <script src="assets/js/cards.js"></script>
+  <script src="assets/js/app.js"></script>
+
+  <script>
+    let messages = new Messages()
+    let app = new Application(messages = messages, cards = cards)
+    app.authenticate()
+  </script>
+</body>
+
+</html>
