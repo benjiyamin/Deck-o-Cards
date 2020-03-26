@@ -3,7 +3,7 @@ let cards = [
   {name: '2 of Diamonds', imgUrl: 'assets/images/cards/PNG-cards-1.3/2_of_diamonds.png'},
   {name: '2 of Hearts', imgUrl: 'assets/images/cards/PNG-cards-1.3/2_of_hearts.png'},
   {name: '2 of Spades', imgUrl: 'assets/images/cards/PNG-cards-1.3/2_of_spades.png'},
-  {name: '3 of Clubs', imgUrl: 'assets/images/cards/PNG-cards-1.3/3_of_clubs.png'},
+  /*{name: '3 of Clubs', imgUrl: 'assets/images/cards/PNG-cards-1.3/3_of_clubs.png'},
   {name: '3 of Diamonds', imgUrl: 'assets/images/cards/PNG-cards-1.3/3_of_diamonds.png'},
   {name: '3 of Hearts', imgUrl: 'assets/images/cards/PNG-cards-1.3/3_of_hearts.png'},
   {name: '3 of Spades', imgUrl: 'assets/images/cards/PNG-cards-1.3/3_of_spades.png'},
@@ -52,5 +52,5 @@ let cards = [
   {name: 'Ace of Hearts', imgUrl: 'assets/images/cards/PNG-cards-1.3/ace_of_hearts.png'},
   {name: 'Ace of Spades', imgUrl: 'assets/images/cards/PNG-cards-1.3/ace_of_spades.png'},
   {name: 'The Red Joker', imgUrl: 'assets/images/cards/PNG-cards-1.3/red_joker.png'},
-  {name: 'The Black Joker', imgUrl: 'assets/images/cards/PNG-cards-1.3/black_joker.png'},
+  {name: 'The Black Joker', imgUrl: 'assets/images/cards/PNG-cards-1.3/black_joker.png'},*/
 ]

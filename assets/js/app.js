@@ -51,7 +51,6 @@ function updateDeckImages(decks) {
   $flippedDeck
     .find('.card-img-top')
     .attr('src', card ? card.imgUrl : 'assets/images/playing-card-back.png')
-  
   $flippedDeck.css({
     opacity: card ? 1 : 0
   })
@@ -168,6 +167,10 @@ function Application(messages, cards) {
       // Update the counters
       self.updateCounters(decks)
 
+      $('#unflippedDeck').css({
+        opacity: decks.unflippedDeck.length ? 1 : 0
+      })
+
       let cardContainer = initCardContainer('#unflippedWrapper', card)
       animateCardContainer(cardContainer, '#flippedWrapper')
       setTimeout(function () {
@@ -186,7 +189,14 @@ function Application(messages, cards) {
 
       let cardContainer = initCardContainer('#flippedWrapper', card, true)
       updateDeckImages(decks)
+      $('#unflippedDeck').css({
+        opacity: decks.unflippedDeck.length > 1 ? 1 : 0
+      })
       animateCardContainer(cardContainer, '#unflippedWrapper')
+
+      setTimeout(function () {
+        updateDeckImages(decks)
+      }, 600)
     })
   }
 
