@@ -108,7 +108,7 @@ function initCardContainer(wrapperSel, card, flipped) {
 }
 
 
-function Application(messages, cards) {
+function Application(cards) {
   let self = this
 
   let config = {
@@ -200,48 +200,22 @@ function Application(messages, cards) {
     })
   }
 
-  this.init = function (gameSnap) {
-    $('#flippedDeck')
-      .css({
-        'opacity': 0
-      })
-    $('#unflippedDeck')
-      .css({
-        'opacity': 1
-      })
-
-    let unflippedDeckExists = gameSnap.child("unflippedDeck").exists()
-    if (unflippedDeckExists) {
-      // messages.displayMsg('Continuing from the current deck')
-    } else {
-      //messages.displayMsg('New deck shuffled')
-      self.shuffleCards()
-    }
-
+  // On game initialization
+  gameRef.once('value').then(function (gameSnap) {
     let decks = self.getDecks(gameSnap)
 
     // Update the counters
     self.updateCounters(decks)
 
     // Update the animation
-    let card = decks.flippedDeck.slice(-1)[0]
+    updateDeckImages(decks)
 
-    if (decks.flippedDeck.length) {
-      let cardContainer = initCardContainer('#unflippedWrapper', card)
-      animateCardContainer(cardContainer, '#flippedWrapper')
-      setTimeout(function () {
-        updateDeckImages(decks)
-      }, 600)
-    }
-  }
-
-  // On game initialization
-  gameRef.once('value').then(function (gameSnap) {
-    self.init(gameSnap)
+    $('#table').show()
+    $('#loader').hide()
   })
 
   // On flip
-  database.ref('game/flippedDeck').on('child_added', function (cardSnap) {
+  database.ref('game/unflippedDeck').on('child_removed', function (cardSnap) {
     self.flipCard(cardSnap)
   })
 
@@ -336,9 +310,6 @@ function Application(messages, cards) {
 
   $('#shuffleBtn').on('click', function () {
     self.shuffleCards()
-    gameRef.once('value').then(function (gameSnap) {
-      self.init(gameSnap)
-    })
   })
 
 }
