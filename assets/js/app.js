@@ -1,4 +1,4 @@
-function shuffle(array) {
+function shuffle(array, count) {
   var currentIndex = array.length,
     temporaryValue, randomIndex
 
@@ -124,10 +124,26 @@ function Application(cards) {
 
   let gameRef = database.ref('game')
 
-  this.shuffleCards = function () {
-    shuffle(cards)
-    database.ref('game/unflippedDeck').set(cards)
+  this.reset = function () {
+    database.ref('game/unflippedDeck').set([])
     database.ref('game/flippedDeck').set([])
+  }
+
+  this.shuffleCards = function () {
+    let deckCount = $('#deckCountInput').val()
+    let cardsCopy = JSON.parse(JSON.stringify(cards))
+
+    // Multiply deck
+    if (deckCount > 1) {
+      for (let i = 0; i < deckCount - 1; i++) {
+        cardsCopy = cardsCopy.concat(cardsCopy)
+      }
+    }
+
+    shuffle(cardsCopy)
+    database.ref('game/unflippedDeck').set(cardsCopy)
+    database.ref('game/flippedDeck').set([])
+    database.ref('game/deckCount').set(deckCount)
   }
 
   this.updateFlippedCounter = function (int) {
@@ -136,6 +152,15 @@ function Application(cards) {
 
   this.updateUnflippedCounter = function (int) {
     $('#unflippedText').text(int)
+  }
+
+  this.updateDeckCounters = function (int) {
+    let deckCountText = `${int} deck`
+    if (int > 1) {
+      deckCountText += 's'
+    }
+    $('#deckCountText').text(deckCountText)
+    $('#deckCountInput').val(int)
   }
 
   this.getDecks = function (gameSnap) {
@@ -149,7 +174,16 @@ function Application(cards) {
     return decks
   }
 
-  this.updateCounters = function (decks) {
+  this.getDeckCount = function (gameSnap) {
+    let gameData = gameSnap.val()
+    let deckCount = 1
+    if (gameData.deckCount) {
+      deckCount = gameData.deckCount
+    }
+    return deckCount
+  }
+
+  this.updateFlipCounters = function (decks) {
     self.updateFlippedCounter(decks.flippedDeck.length)
     self.updateUnflippedCounter(decks.unflippedDeck.length)
   }
@@ -165,7 +199,7 @@ function Application(cards) {
       let card = cardSnap.val()
 
       // Update the counters
-      self.updateCounters(decks)
+      self.updateFlipCounters(decks)
 
       $('#unflippedDeck').css({
         opacity: decks.unflippedDeck.length ? 1 : 0
@@ -185,7 +219,7 @@ function Application(cards) {
       let card = cardSnap.val()
 
       // Update the counters
-      self.updateCounters(decks)
+      self.updateFlipCounters(decks)
 
       let cardContainer = initCardContainer('#flippedWrapper', card, true)
       updateDeckImages(decks)
@@ -205,7 +239,11 @@ function Application(cards) {
     let decks = self.getDecks(gameSnap)
 
     // Update the counters
-    self.updateCounters(decks)
+    self.updateFlipCounters(decks)
+
+    // Update deck count
+    let deckCount = self.getDeckCount(gameSnap)
+    self.updateDeckCounters(deckCount)
 
     // Update the animation
     updateDeckImages(decks)
@@ -222,6 +260,11 @@ function Application(cards) {
   // On unflip
   database.ref('game/flippedDeck').on('child_removed', function (cardSnap) {
     self.unflipCard(cardSnap)
+  })
+
+  // On deck count change
+  database.ref('game/deckCount').on('value', function (deckCountSnap) {
+    self.updateDeckCounters(deckCountSnap.val())
   })
 
   this.authenticate = function () {
@@ -309,6 +352,7 @@ function Application(cards) {
   })
 
   $('#shuffleBtn').on('click', function () {
+    self.reset()
     self.shuffleCards()
   })
 

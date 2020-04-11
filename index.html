@@ -43,6 +43,7 @@
             <div class="col-sm-6">
               <div class="row lead">
                 <div class="col">
+                  <span class="pr-3" id="deckCountText">0 decks</span>
                   <span class="pr-3"><span id="flippedText">0</span> flipped</span>
                   <span class="pl-3"><span id="unflippedText">0</span> unflipped</span>
                 </div>
@@ -113,6 +114,12 @@
         </div>
         <div class="modal-body">
           <p>You are about to shuffle the deck. This action cannot be undone.</p>
+          <form>
+            <div class="form-group">
+              <label for="deckCountInput">Number of Decks</label>
+              <input type="number" step="1" value="1" min="1" class="form-control" id="deckCountInput" placeholder="Enter Number" />
+            </div>
+          </form>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-primary" data-dismiss="modal" id="shuffleBtn">Shuffle</button>
