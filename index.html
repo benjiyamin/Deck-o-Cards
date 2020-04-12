@@ -29,8 +29,8 @@
   <div class="container">
     <div class="row">
 
-      <main role="main" class="col ml-sm-auto px-4">
-        <div class="jumbotron bg-transparent mb-0 py-5">
+      <main role="main" class="col-sm-12 col-md-8 col-lg-9 ml-sm-auto px-4">
+        <div class="mb-0 py-5">
           <div class="row text-center">
             <div class="col-sm-6 lead">
               <div id="message"></div>
@@ -41,9 +41,13 @@
                 Deck</button>
             </div>
             <div class="col-sm-6">
+              <div class="row">
+                <div class="col display-4">
+                  <span id="deckCountText">0 decks</span>
+                </div>
+              </div>
               <div class="row lead">
                 <div class="col">
-                  <span class="pr-3" id="deckCountText">0 decks</span>
                   <span class="pr-3"><span id="flippedText">0</span> flipped</span>
                   <span class="pl-3"><span id="unflippedText">0</span> unflipped</span>
                 </div>
@@ -80,6 +84,18 @@
         </div>
       </main>
 
+      <div class="col-sm-12 col-md-4 col-lg-3">
+        <div class="card d-md-block bg-dark border-0">
+          <!--<h5 class="card-header">Players
+          </h5>-->
+          <div class="card-body bg-light" id="playerCardBody">
+            <ul class="list-group text-dark" id="playerList">
+            </ul>
+          </div>
+        </div>
+
+      </div>
+
       <div class="card d-none d-md-block bg-dark chat-card">
         <h5 class="card-header">Chat <span class="float-right" id="minChat"><i class="fas fa-minus-square"></i></span>
         </h5>
@@ -114,15 +130,37 @@
         </div>
         <div class="modal-body">
           <p>You are about to shuffle the deck. This action cannot be undone.</p>
-          <form>
-            <div class="form-group">
-              <label for="deckCountInput">Number of Decks</label>
-              <input type="number" step="1" value="1" min="1" class="form-control" id="deckCountInput" placeholder="Enter Number" />
-            </div>
-          </form>
+          <div class="form-group">
+            <label for="deckCountInput">Number of Decks</label>
+            <input type="number" step="1" value="1" min="1" max="2" class="form-control" id="deckCountInput"
+              placeholder="Enter Number" />
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-primary" data-dismiss="modal" id="shuffleBtn">Shuffle</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" tabindex="-1" role="dialog" id="settingsModal">
+    <div class="modal-dialog text-dark" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Settings</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="deckCountInput">Display Name</label>
+            <input type="text" class="form-control" id="userNameInput" placeholder="Enter Text" />
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-dismiss="modal" id="saveSettingsBtn">Save</button>
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
         </div>
       </div>
@@ -139,6 +177,8 @@
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
     integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
   </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.15/lodash.min.js"></script>
 
   <script src="https://www.gstatic.com/firebasejs/5.10.0/firebase.js"></script>
 

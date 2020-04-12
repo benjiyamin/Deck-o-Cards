@@ -1,5 +1,5 @@
 function shuffle(array, count) {
-  var currentIndex = array.length,
+  let currentIndex = array.length,
     temporaryValue, randomIndex
 
   // While there remain elements to shuffle...
@@ -19,8 +19,8 @@ function shuffle(array, count) {
 }
 
 function moveElementToElement(fromElemSelector, toElemSelector) {
-  let x = $(toElemSelector).offset().left
-  let y = $(toElemSelector).offset().top
+  const x = $(toElemSelector).offset().left
+  const y = $(toElemSelector).offset().top
   $(fromElemSelector).animate({
     left: x,
     top: y
@@ -30,8 +30,8 @@ function moveElementToElement(fromElemSelector, toElemSelector) {
 }
 
 function animateCardContainer(cardContainer, newWrapperSel) {
-  let x = $(newWrapperSel).offset().left
-  let y = $(newWrapperSel).offset().top
+  const x = $(newWrapperSel).offset().left
+  const y = $(newWrapperSel).offset().top
   $(cardContainer).animate({
     left: x,
     top: y
@@ -39,15 +39,16 @@ function animateCardContainer(cardContainer, newWrapperSel) {
     duration: 600
   })
   cardContainer.toggleClass('flipped')
+
   setTimeout(function () {
     cardContainer.remove()
   }, 600)
+
 }
 
-function updateDeckImages(decks) {
-  let card = decks.flippedDeck.slice(-1)[0]
-  let $flippedDeck = $('#flippedDeck')
-  let $unflippedDeck = $('#unflippedDeck')
+function updateDeckImages(card, showUnflippedDeck) {
+  const $flippedDeck = $('#flippedDeck')
+  const $unflippedDeck = $('#unflippedDeck')
   $flippedDeck
     .find('.card-img-top')
     .attr('src', card ? card.imgUrl : 'assets/images/playing-card-back.png')
@@ -56,39 +57,39 @@ function updateDeckImages(decks) {
   })
 
   $unflippedDeck.css({
-    opacity: decks.unflippedDeck.length ? 1 : 0
+    opacity: showUnflippedDeck ? 1 : 0
   })
 }
 
 function initCardContainer(wrapperSel, card, flipped) {
 
-  let $unflippedDeck = flipped ? $('#flippedDeck') : $('#unflippedDeck')
-  let pos = $unflippedDeck.offset()
+  const $unflippedDeck = flipped ? $('#flippedDeck') : $('#unflippedDeck')
+  const pos = $unflippedDeck.offset()
 
-  let imgUrl = card ? card.imgUrl : 'assets/images/playing-card-back.png'
+  const imgUrl = card ? card.imgUrl : 'assets/images/playing-card-back.png'
 
-  let backImg = $('<img>')
+  const backImg = $('<img>')
     .addClass('card-img-top')
     .attr('src', imgUrl)
-  let backCard = $('<div>')
+  const backCard = $('<div>')
     .addClass('card')
     .append(backImg)
-  let back = $('<div>')
+  const back = $('<div>')
     .addClass('back')
     .append(backCard)
-  let frontImg = $('<img>')
+  const frontImg = $('<img>')
     .addClass('card-img-top')
     .attr('src', 'assets/images/playing-card-back.png')
-  let frontCard = $('<div>')
+  const frontCard = $('<div>')
     .addClass('card')
     .append(frontImg)
-  let front = $('<div>')
+  const front = $('<div>')
     .addClass('front')
     .append(frontCard)
-  let flipper = $('<div>')
+  const flipper = $('<div>')
     .addClass('flipper shadow')
     .append(front, back)
-  let flipContainer = $('<div>')
+  const flipContainer = $('<div>')
     .addClass('flip-container')
     .css({
       position: 'fixed',
@@ -107,30 +108,116 @@ function initCardContainer(wrapperSel, card, flipped) {
   return flipContainer
 }
 
+function updateFlippedCounter(int) {
+  $('#flippedText').text(int)
+}
+
+function updateUnflippedCounter(int) {
+  $('#unflippedText').text(int)
+}
+
+function updateFlipCounters(decks) {
+  updateFlippedCounter(decks.flippedDeck.length)
+  updateUnflippedCounter(decks.unflippedDeck.length)
+}
+
+function updateDeckCounters(int) {
+  let deckCountText = `${int} deck`
+  if (int > 1) {
+    deckCountText += 's'
+  }
+  $('#deckCountText').text(deckCountText)
+  $('#deckCountInput').val(int)
+}
+
+function getCardValue(card) {
+  const value = card.name.split('of')[0].trim()
+  if (!isNaN(value)) {
+    return parseInt(value)
+  } else if (value === 'Ace') {
+    return 1
+  } else if (card.name.indexOf('Joker') !== -1) {
+    return 15
+  } else {
+    return 10
+  }
+}
+
+function updatePlayerList(flippedDeck, user, players) {
+  const playerArray = _.groupBy(flippedDeck, 'userId')
+  const $playerList = $('#playerList')
+    .empty()
+
+  const $playerCardBody = $('#playerCardBody')
+  if (_.isEmpty(playerArray)) {
+    $playerCardBody.hide()
+  } else {
+    $playerCardBody.show()
+  }
+
+  let playerIndex = 1
+  for (const userId in playerArray) {
+    if (playerArray.hasOwnProperty(userId)) {
+      const playerCards = playerArray[userId]
+
+      let score = 0
+      let name
+      for (let i = 0; i < playerCards.length; i++) {
+        const card = playerCards[i]
+        const value = getCardValue(card)
+        score += value
+        name = players[userId] || `Player ${playerIndex}`
+      }
+
+      const playerIcon = $('<i>')
+        .addClass(user.uid == userId ? 'fas fa-user-edit' : 'fas fa-user')
+      const latestCard = flippedDeck.slice(-1)[0]
+
+      const playerBadge = $('<span>')
+        .addClass('badge badge-secondary badge-pill')
+        .text(score)
+      const playerListItem = $('<li>')
+        .addClass('list-group-item d-flex justify-content-between align-items-center')
+        .append(playerIcon, name, playerBadge)
+
+      if (latestCard.userId == userId) {
+        playerListItem.addClass('active')
+      }
+
+      if (user.uid == userId) {
+        playerIcon.attr('data-toggle', 'modal')
+        playerIcon.attr('data-target', '#settingsModal')
+        playerIcon.addClass('cursor-pointer')
+      }
+      $playerList.append(playerListItem)
+
+    }
+    playerIndex += 1
+  }
+}
+
 
 function Application(cards) {
-  let self = this
+  const self = this
 
-  let config = {
+  const config = {
     apiKey: "AIzaSyAsMo5nzeM6BM2u9OnJXxoOXulUHAd1sVY",
     authDomain: "deck-o-cards.firebaseapp.com",
     databaseURL: "https://deck-o-cards.firebaseio.com",
     projectId: "deck-o-cards",
     storageBucket: "deck-o-cards.appspot.com",
     messagingSenderId: "245006645475"
-  };
-  firebase.initializeApp(config);
-  let database = firebase.database()
-
-  let gameRef = database.ref('game')
-
-  this.reset = function () {
-    database.ref('game/unflippedDeck').set([])
-    database.ref('game/flippedDeck').set([])
   }
+  firebase.initializeApp(config)
+  const database = firebase.database()
+
+  const gameRef = database.ref('game')
+  const playersRef = database.ref('game/players')
+  const unflippedDeckRef = database.ref('game/unflippedDeck')
+  const flippedDeckRef = database.ref('game/flippedDeck')
 
   this.shuffleCards = function () {
-    let deckCount = $('#deckCountInput').val()
+    const deckCount = $('#deckCountInput').val()
     let cardsCopy = JSON.parse(JSON.stringify(cards))
 
     // Multiply deck
@@ -141,145 +228,164 @@ function Application(cards) {
     }
 
     shuffle(cardsCopy)
-    database.ref('game/unflippedDeck').set(cardsCopy)
-    database.ref('game/flippedDeck').set([])
-    database.ref('game/deckCount').set(deckCount)
+    unflippedDeckRef.set(cardsCopy)
+    flippedDeckRef.remove()
+
+    updateDeckCounters(deckCount)
   }
 
-  this.updateFlippedCounter = function (int) {
-    $('#flippedText').text(int)
-  }
-
-  this.updateUnflippedCounter = function (int) {
-    $('#unflippedText').text(int)
-  }
-
-  this.updateDeckCounters = function (int) {
-    let deckCountText = `${int} deck`
-    if (int > 1) {
-      deckCountText += 's'
-    }
-    $('#deckCountText').text(deckCountText)
-    $('#deckCountInput').val(int)
+  this.saveSettings = function () {
+    database.ref('game').once('value', function (gameSnap) {
+      const players = self.getPlayers(gameSnap)
+      const user = firebase.auth().currentUser
+      players[user.uid] = $('#userNameInput').val()
+      playersRef.set(players)
+    })
   }
 
   this.getDecks = function (gameSnap) {
-    let gameData = gameSnap.val()
-    let unflippedDeck = gameData.unflippedDeck || []
-    let flippedDeck = gameData.flippedDeck || []
-    let decks = {
+    const gameData = gameSnap.val()
+    const unflippedDeck = gameData.unflippedDeck || []
+    const flippedDeck = gameData.flippedDeck || []
+    const decks = {
       unflippedDeck: unflippedDeck,
       flippedDeck: flippedDeck,
     }
     return decks
   }
 
-  this.getDeckCount = function (gameSnap) {
-    let gameData = gameSnap.val()
-    let deckCount = 1
-    if (gameData.deckCount) {
-      deckCount = gameData.deckCount
-    }
-    return deckCount
+  this.getPlayers = function (gameSnap) {
+    const gameData = gameSnap.val()
+    return gameData.players || {}
   }
 
-  this.updateFlipCounters = function (decks) {
-    self.updateFlippedCounter(decks.flippedDeck.length)
-    self.updateUnflippedCounter(decks.unflippedDeck.length)
+  this.getDeckCount = function (decks) {
+    const deckCount = (decks.flippedDeck.length + decks.unflippedDeck.length) / cards.length
+    return Math.round(deckCount)
   }
 
   this.updateDatabase = function (decks) {
-    database.ref('game/unflippedDeck').set(decks.unflippedDeck)
-    database.ref('game/flippedDeck').set(decks.flippedDeck)
+    unflippedDeckRef.set(decks.unflippedDeck)
+    flippedDeckRef.set(decks.flippedDeck)
   }
 
-  this.flipCard = function (cardSnap) {
-    database.ref('game').once('value', function (gameSnap) {
-      let decks = self.getDecks(gameSnap)
-      let card = cardSnap.val()
+  //let timeout
 
-      // Update the counters
-      self.updateFlipCounters(decks)
+  this.flipCard = function (card) {
+    gameRef.once('value', function (gameSnap) {
+      const decks = self.getDecks(gameSnap)
 
       $('#unflippedDeck').css({
         opacity: decks.unflippedDeck.length ? 1 : 0
       })
 
-      let cardContainer = initCardContainer('#unflippedWrapper', card)
+      const cardContainer = initCardContainer('#unflippedWrapper', card)
       animateCardContainer(cardContainer, '#flippedWrapper')
+
+      //clearTimeout(timeout)
       setTimeout(function () {
-        updateDeckImages(decks)
+        const showUnflippedDeck = decks.unflippedDeck.length > 0
+        updateDeckImages(card, showUnflippedDeck)
       }, 600)
     })
   }
 
-  this.unflipCard = function (cardSnap) {
-    database.ref('game').once('value', function (gameSnap) {
-      let decks = self.getDecks(gameSnap)
-      let card = cardSnap.val()
+  this.unflipCard = function (card) {
+    gameRef.once('value', function (gameSnap) {
+      const decks = self.getDecks(gameSnap)
 
-      // Update the counters
-      self.updateFlipCounters(decks)
+      const cardContainer = initCardContainer('#flippedWrapper', card, true)
 
-      let cardContainer = initCardContainer('#flippedWrapper', card, true)
-      updateDeckImages(decks)
-      $('#unflippedDeck').css({
-        opacity: decks.unflippedDeck.length > 1 ? 1 : 0
-      })
+      const newCard = decks.flippedDeck.slice(-1)[0]
+      updateDeckImages(newCard, decks.unflippedDeck.length > 1)
+
       animateCardContainer(cardContainer, '#unflippedWrapper')
 
+      //clearTimeout(timeout)
       setTimeout(function () {
-        updateDeckImages(decks)
+        const showUnflippedDeck = decks.unflippedDeck.length > 0
+        updateDeckImages(newCard, showUnflippedDeck)
       }, 600)
+
     })
   }
 
   // On game initialization
   gameRef.once('value').then(function (gameSnap) {
-    let decks = self.getDecks(gameSnap)
-
-    // Update the counters
-    self.updateFlipCounters(decks)
-
-    // Update deck count
-    let deckCount = self.getDeckCount(gameSnap)
-    self.updateDeckCounters(deckCount)
+    const decks = self.getDecks(gameSnap)
 
     // Update the animation
-    updateDeckImages(decks)
+    const card = decks.flippedDeck.slice(-1)[0]
+    const showUnflippedDeck = decks.unflippedDeck.length > 0
+    updateDeckImages(card, showUnflippedDeck)
 
     $('#table').show()
     $('#loader').hide()
   })
 
   // On flip
-  database.ref('game/unflippedDeck').on('child_removed', function (cardSnap) {
-    self.flipCard(cardSnap)
+  unflippedDeckRef.on('child_removed', function (cardSnap) {
+    const card = cardSnap.val()
+    self.flipCard(card)
+    //console.log('flip')
   })
 
   // On unflip
-  database.ref('game/flippedDeck').on('child_removed', function (cardSnap) {
-    self.unflipCard(cardSnap)
+  flippedDeckRef.on('child_removed', function (cardSnap) {
+    const card = cardSnap.val()
+    self.unflipCard(card)
+    //console.log('unflip')
   })
 
-  // On deck count change
-  database.ref('game/deckCount').on('value', function (deckCountSnap) {
-    self.updateDeckCounters(deckCountSnap.val())
+  // On mod
+  gameRef.on('value', function (gameSnap) {
+    const decks = self.getDecks(gameSnap)
+
+    // Update the counters
+    updateFlipCounters(decks)
+
+    // Update deck count
+    const deckCount = self.getDeckCount(decks)
+    updateDeckCounters(deckCount)
+
+    // Update player list
+    const user = firebase.auth().currentUser
+    const players = self.getPlayers(gameSnap)
+    updatePlayerList(decks.flippedDeck, user, players)
+
+    //console.log('mod')
+  })
+
+  playersRef.on('value', function (playersSnap) {
+    const players = playersSnap.val()
+    const user = firebase.auth().currentUser
+    const currentPlayer = players[user.uid]
+    $('#userNameInput').val(currentPlayer)
+
+    database.ref('game').once('value', function (gameSnap) {
+      const decks = self.getDecks(gameSnap)
+      updatePlayerList(decks.flippedDeck, user, players)
+    })
   })
 
   this.authenticate = function () {
     firebase.auth().signInAnonymously().catch(function (error) {
       // Handle Errors here.
-      var errorCode = error.code;
-      var errorMessage = error.message;
+      const errorCode = error.code
+      const errorMessage = error.message
       // ...
-    });
+    })
   }
 
   $('#unflippedDeck').on('click', function () {
     database.ref('game').once('value', function (gameSnap) {
-      let decks = self.getDecks(gameSnap)
-      let card = decks.unflippedDeck.pop()
+      const decks = self.getDecks(gameSnap)
+      const card = decks.unflippedDeck.pop()
+
+      const user = firebase.auth().currentUser
+      card.userId = user.uid
+      card.timestamp = firebase.database.ServerValue.TIMESTAMP
+
       decks.flippedDeck.push(card)
 
       self.updateDatabase(decks)
@@ -288,8 +394,8 @@ function Application(cards) {
 
   $('#flippedDeck').on('click', function () {
     database.ref('game').once('value', function (gameSnap) {
-      let decks = self.getDecks(gameSnap)
-      let card = decks.flippedDeck.pop()
+      const decks = self.getDecks(gameSnap)
+      const card = decks.flippedDeck.pop()
       decks.unflippedDeck.push(card)
 
       self.updateDatabase(decks)
@@ -298,11 +404,11 @@ function Application(cards) {
 
 
   this.sendMessage = function () {
-    let $msgInput = $('#msgInput')
-    let text = $msgInput.val().trim()
+    const $msgInput = $('#msgInput')
+    const text = $msgInput.val().trim()
     if (text) {
       // Store to firebase
-      var user = firebase.auth().currentUser
+      const user = firebase.auth().currentUser
       database.ref('messages').push({
         text: text,
         user: user.uid,
@@ -313,31 +419,31 @@ function Application(cards) {
   }
 
   // This function allows you to update your page in real-time when the firebase database changes.
-  var child_added_first = true;
+  let child_added_first = true
   database.ref('messages').orderByChild('timestamp').limitToLast(1).on('child_added', function (snapshot) {
     if (!child_added_first) {
-      var user = firebase.auth().currentUser
-      let msgData = snapshot.val()
-      var timeStamp = moment(msgData.timestamp).format('h:mm:ss A')
-      let p = $('<p>').text(msgData.text)
-      let chatTime = $('<span>')
+      const user = firebase.auth().currentUser
+      const msgData = snapshot.val()
+      const timeStamp = moment(msgData.timestamp).format('h:mm:ss A')
+      const p = $('<p>').text(msgData.text)
+      const chatTime = $('<span>')
         .addClass('chat-time')
         .text(timeStamp)
-      let msgType = $('<div>')
+      const msgType = $('<div>')
         .append(p, chatTime)
       if (msgData.user == user.uid) {
         msgType.addClass('outgoing px-0 offset-sm-5 col-sm-7')
       } else {
         msgType.addClass('incoming px-0 col-sm-7')
       }
-      let chatMsg = $('<div>')
+      const chatMsg = $('<div>')
         .addClass('chat-message row')
         .append(msgType)
-      let chatMessages = $('#chatMessages')
+      const chatMessages = $('#chatMessages')
         .append(chatMsg)
-      chatMessages.scrollTop(chatMessages[0].scrollHeight);
+      chatMessages.scrollTop(chatMessages[0].scrollHeight)
     }
-    child_added_first = false;
+    child_added_first = false
   })
 
   $('#msgInput').on('keyup', function (e) {
@@ -345,15 +451,19 @@ function Application(cards) {
     if (e.keyCode == 13) {
       self.sendMessage()
     }
-  });
+  })
 
   $('#msgBtn').on('click', function () {
     self.sendMessage()
   })
 
   $('#shuffleBtn').on('click', function () {
-    self.reset()
+    //self.reset()
     self.shuffleCards()
+  })
+
+  $('#saveSettingsBtn').on('click', function () {
+    self.saveSettings()
   })
 
 }
