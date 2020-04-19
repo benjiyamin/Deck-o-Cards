@@ -218,17 +218,17 @@ function Application(cards) {
 
   this.shuffleCards = function () {
     const deckCount = $('#deckCountInput').val()
-    let cardsCopy = JSON.parse(JSON.stringify(cards))
+    let newDeck = []
 
     // Multiply deck
-    if (deckCount > 1) {
-      for (let i = 0; i < deckCount - 1; i++) {
-        cardsCopy = cardsCopy.concat(cardsCopy)
+    if (deckCount > 0) {
+      for (let i = 0; i < deckCount; i++) {
+        newDeck = newDeck.concat(cards)
       }
     }
 
-    shuffle(cardsCopy)
-    unflippedDeckRef.set(cardsCopy)
+    shuffle(newDeck)
+    unflippedDeckRef.set(newDeck)
     flippedDeckRef.remove()
 
     updateDeckCounters(deckCount)
