@@ -138,9 +138,8 @@ function getCardValue(card) {
     return 1
   } else if (card.name.indexOf('Joker') !== -1) {
     return 15
-  } else {
-    return 10
   }
+  return 10
 }
 
 function updatePlayerList(flippedDeck, user, players) {
@@ -197,6 +196,11 @@ function updatePlayerList(flippedDeck, user, players) {
 }
 
 
+const quill = new Quill('#editor', {
+  theme: 'snow'
+})
+
+
 function Application(cards) {
   const self = this
 
@@ -215,6 +219,7 @@ function Application(cards) {
   const playersRef = database.ref('game/players')
   const unflippedDeckRef = database.ref('game/unflippedDeck')
   const flippedDeckRef = database.ref('game/flippedDeck')
+  const rulesRef = database.ref('game/rules')
 
   this.shuffleCards = function () {
     const deckCount = $('#deckCountInput').val()
@@ -321,20 +326,21 @@ function Application(cards) {
 
     $('#table').show()
     $('#loader').hide()
+
+    // Load rules
+    //self.loadRules()
   })
 
   // On flip
   unflippedDeckRef.on('child_removed', function (cardSnap) {
     const card = cardSnap.val()
     self.flipCard(card)
-    //console.log('flip')
   })
 
   // On unflip
   flippedDeckRef.on('child_removed', function (cardSnap) {
     const card = cardSnap.val()
     self.unflipCard(card)
-    //console.log('unflip')
   })
 
   // On mod
@@ -352,8 +358,6 @@ function Application(cards) {
     const user = firebase.auth().currentUser
     const players = self.getPlayers(gameSnap)
     updatePlayerList(decks.flippedDeck, user, players)
-
-    //console.log('mod')
   })
 
   playersRef.on('value', function (playersSnap) {
@@ -402,7 +406,6 @@ function Application(cards) {
     })
   })
 
-
   this.sendMessage = function () {
     const $msgInput = $('#msgInput')
     const text = $msgInput.val().trim()
@@ -446,6 +449,17 @@ function Application(cards) {
     child_added_first = false
   })
 
+  // On rule mod
+  rulesRef.on('value', function (rulesSnap) {
+    const rules = rulesSnap.val()
+    quill.setContents(rules)
+  })
+
+  this.saveRules = function () {
+    const data = quill.getText().trim().length ? JSON.parse(JSON.stringify(quill.getContents())) : null
+    rulesRef.set(data)
+  }
+
   $('#msgInput').on('keyup', function (e) {
     // If enter clicked
     if (e.keyCode == 13) {
@@ -464,6 +478,10 @@ function Application(cards) {
 
   $('#saveSettingsBtn').on('click', function () {
     self.saveSettings()
+  })
+
+  $('#saveRulesBtn').on('click', function () {
+    self.saveRules()
   })
 
 }
